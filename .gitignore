@@ -48,9 +48,14 @@ build/
 # Temporary files
 tmp/
 temp/
+scripts/temp/
+
 # Data files (session-specific, should not be committed)
 src/data/
 !src/data/.gitkeep
 
-# Claude configuration (user-specific)
-CLAUDE.md
+# Work logs and notes (user-specific)
+docs/notes/
+
+# Sessions (Telegram)
+sessions/

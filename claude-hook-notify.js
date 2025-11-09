@@ -19,7 +19,7 @@ console.log('🔧 Looking for .env at:', envPath);
 
 if (fs.existsSync(envPath)) {
     console.log('✅ .env file found, loading...');
-    dotenv.config({ path: envPath });
+    dotenv.config({ path: envPath, override: true });
 } else {
     console.error('❌ .env file not found at:', envPath);
     console.log('📂 Available files in script directory:');
@@ -35,6 +35,7 @@ if (fs.existsSync(envPath)) {
 const TelegramChannel = require('./src/channels/telegram/telegram');
 const DesktopChannel = require('./src/channels/local/desktop');
 const EmailChannel = require('./src/channels/email/smtp');
+const DiscordChannel = require('./src/channels/discord/discord');
 
 async function sendHookNotification() {
     try {
@@ -90,6 +91,20 @@ async function sendHookNotification() {
             }
         }
         
+        // Configure Discord channel if enabled
+        if (process.env.DISCORD_ENABLED === 'true' && process.env.DISCORD_BOT_TOKEN) {
+            const discordConfig = {
+                botToken: process.env.DISCORD_BOT_TOKEN,
+                channelId: process.env.DISCORD_CHANNEL_ID,
+                serverId: process.env.DISCORD_SERVER_ID
+            };
+            
+            if (discordConfig.botToken && discordConfig.channelId) {
+                const discordChannel = new DiscordChannel(discordConfig);
+                channels.push({ name: 'Discord', channel: discordChannel });
+            }
+        }
+        
         // Get current working directory and tmux session
         const currentDir = process.cwd();
         const projectName = path.basename(currentDir);
@@ -115,7 +130,6 @@ async function sendHookNotification() {
             title: `Claude ${notificationType === 'completed' ? 'Task Completed' : 'Waiting for Input'}`,
             message: `Claude has ${notificationType === 'completed' ? 'completed a task' : 'is waiting for input'}`,
             project: projectName
-            // Don't set metadata here - let TelegramChannel extract real conversation content
         };
         
         console.log(`📱 Sending ${notificationType} notification for project: ${projectName}`);
@@ -147,6 +161,9 @@ async function sendHookNotification() {
             console.log(`\n✅ Successfully sent notifications via ${successful}/${total} channels`);
             if (results.some(r => r.name === 'Telegram' && r.success)) {
                 console.log('📋 You can now send new commands via Telegram');
+            }
+            if (results.some(r => r.name === 'Discord' && r.success)) {
+                console.log('📋 You can now send new commands via Discord');
             }
         } else {
             console.log('\n❌ All notification channels failed');

@@ -78,10 +78,27 @@ Control [Claude Code](https://claude.ai/code) remotely via multiple messaging pl
 
 ## 🚀 Quick Start
 
+### Deployment Options
+
+**Choose your preferred deployment method:**
+
+1. **🐳 Docker Deployment (Recommended for Production)**
+   - Easiest setup with automatic restart
+   - Container isolation and resource management
+   - Perfect for 24/7 operation
+   - See [Docker Deployment Guide](docs/official/DOCKER_DEPLOYMENT.md)
+
+2. **🖥️ Manual Deployment (Development)**
+   - Direct control and easier debugging
+   - Suitable for development and testing
+   - Follow the setup guide below
+
+---
+
 ### 1. Prerequisites
 
 **System Requirements:**
-- Node.js >= 14.0.0
+- Node.js >= 14.0.0 (Manual deployment) / Docker + Docker Compose (Docker deployment)
 - **tmux** (required for command injection)
 - Active tmux session with Claude Code running
 

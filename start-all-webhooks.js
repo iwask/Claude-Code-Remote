@@ -35,6 +35,21 @@ if (process.env.TELEGRAM_ENABLED === 'true' && process.env.TELEGRAM_BOT_TOKEN) {
     processes.push({ name: 'Telegram', process: telegramProcess });
 }
 
+// Start Discord webhook if enabled
+if (process.env.DISCORD_ENABLED === 'true' && process.env.DISCORD_BOT_TOKEN) {
+    console.log('🎮 Starting Discord webhook server...');
+    const discordProcess = spawn('node', ['start-discord-webhook.js'], {
+        stdio: ['inherit', 'inherit', 'inherit'],
+        env: process.env
+    });
+    
+    discordProcess.on('exit', (code) => {
+        console.log(`🎮 Discord webhook server exited with code ${code}`);
+    });
+    
+    processes.push({ name: 'Discord', process: discordProcess });
+}
+
 // Start LINE webhook if enabled
 if (process.env.LINE_ENABLED === 'true' && process.env.LINE_CHANNEL_ACCESS_TOKEN) {
     console.log('📱 Starting LINE webhook server...');
@@ -67,6 +82,7 @@ if (process.env.EMAIL_ENABLED === 'true' && process.env.SMTP_USER) {
 
 if (processes.length === 0) {
     console.log('❌ No platforms enabled. Please configure at least one platform in .env file:');
+    console.log('   - Set DISCORD_ENABLED=true and configure DISCORD_BOT_TOKEN');
     console.log('   - Set TELEGRAM_ENABLED=true and configure TELEGRAM_BOT_TOKEN');
     console.log('   - Set LINE_ENABLED=true and configure LINE_CHANNEL_ACCESS_TOKEN');
     console.log('   - Set EMAIL_ENABLED=true and configure SMTP_USER');
@@ -78,7 +94,11 @@ processes.forEach(p => {
     console.log(`   - ${p.name}`);
 });
 
-console.log('\n📋 Platform Command Formats:');
+console.log('
+📋 Platform Command Formats:');
+if (process.env.DISCORD_ENABLED === 'true') {
+    console.log('   Discord: TOKEN123 <command>');
+}
 if (process.env.TELEGRAM_ENABLED === 'true') {
     console.log('   Telegram: /cmd TOKEN123 <command>');
 }
