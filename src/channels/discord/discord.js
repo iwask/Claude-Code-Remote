@@ -228,12 +228,14 @@ class DiscordChannel extends NotificationChannel {
                 }
             }
 
-            // Add interactive instructions
-            embed.addFields({
-                name: '💬 Send New Command',
-                value: `Reply with: \`${token} <your command>\`\nExample: \`${token} Please analyze this code file\``,
-                inline: false
-            });
+            // Add interactive instructions (only for non-response notifications)
+            if (notification.type !== 'response') {
+                embed.addFields({
+                    name: '💬 Reply',
+                    value: `You can reply with: \`${token} <your message>\``,
+                    inline: false
+                });
+            }
 
             this.logger.info('📨 Sending embed message to Discord...');
             const message = await channel.send({ embeds: [embed] });
