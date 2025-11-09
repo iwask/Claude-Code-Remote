@@ -1,5 +1,25 @@
 # Claude Code Remote - プロジェクト管理ガイド
 
+## 🔔 Discord通知ルール
+
+**重要**: 各応答完了後、必ずDiscordに通知を送信すること。
+
+### 通知送信手順
+
+1. **応答完了時に必ず実行**:
+   ```bash
+   echo "あなたの応答内容をここに" > /tmp/claude-response.txt
+   CLAUDE_HOOK_RESPONSE_TEXT="$(cat /tmp/claude-response.txt)" node /Users/hi/src/Claude-Code-Remote/claude-hook-notify.js response
+   ```
+
+2. **通知内容**:
+   - 応答の要約（100-200文字程度）
+   - 長い応答の場合は冒頭部分のみ
+
+3. **例外**:
+   - 単純な確認応答（「はい」「了解」など）は通知不要
+   - ユーザーが通知を望まない場合は省略可
+
 ## 📋 コミットルール
 
 ### 必須: 作業完了ごとに必ずコミット
