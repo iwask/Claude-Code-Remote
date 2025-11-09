@@ -183,16 +183,31 @@ class DiscordChannel extends NotificationChannel {
             await this._storeSession(token, notification, tmuxSession);
 
             // Create rich embed
+            const embedColor = notification.type === 'completed' ? 0x00ff00 :
+                              notification.type === 'response' ? 0x0099ff :
+                              0xffff00;
+
             const embed = new EmbedBuilder()
                 .setTitle(notification.title || 'Claude Code Notification')
-                .setDescription(notification.message || 'Claude has completed a task')
-                .setColor(notification.type === 'completed' ? 0x00ff00 : 0xffff00)
+                .setColor(embedColor)
                 .addFields(
                     { name: 'Project', value: notification.project || 'Unknown', inline: true },
                     { name: 'Type', value: notification.type || 'unknown', inline: true },
                     { name: 'Session Token', value: `\`${token}\``, inline: true }
                 )
                 .setTimestamp();
+
+            // Add response text if available (for 'response' type notifications)
+            if (notification.type === 'response' && notification.responseText) {
+                // Discord embed description limit is 4096 characters
+                const responsePreview = notification.responseText.length > 1900
+                    ? notification.responseText.substring(0, 1900) + '\n\n...(続きはClaudeで確認)'
+                    : notification.responseText;
+
+                embed.setDescription(responsePreview);
+            } else {
+                embed.setDescription(notification.message || 'Claude has completed a task');
+            }
 
             // Add metadata if available
             if (notification.metadata) {

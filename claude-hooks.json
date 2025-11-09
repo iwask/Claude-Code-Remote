@@ -1,12 +1,24 @@
 {
   "hooks": {
+    "AssistantResponse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/hi/src/Claude-Code-Remote/claude-hook-notify.js response",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "node /Users/path/to/Claude-Code-Remote/claude-hook-notify.js completed",
+            "command": "node /Users/hi/src/Claude-Code-Remote/claude-hook-notify.js completed",
             "timeout": 5
           }
         ]
@@ -17,8 +29,8 @@
         "matcher": "*",
         "hooks": [
           {
-            "type": "command", 
-            "command": "node /Users/path/to/Claude-Code-Remote/claude-hook-notify.js waiting",
+            "type": "command",
+            "command": "node /Users/hi/src/Claude-Code-Remote/claude-hook-notify.js waiting",
             "timeout": 5
           }
         ]

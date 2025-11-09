@@ -43,7 +43,11 @@ async function sendHookNotification() {
         
         // Get notification type from command line argument
         const notificationType = process.argv[2] || 'completed';
-        
+
+        // Get Claude response content from environment variables
+        const responseText = process.env.CLAUDE_HOOK_RESPONSE_TEXT || '';
+        const thinkingText = process.env.CLAUDE_HOOK_RESPONSE_THINKING || '';
+
         const channels = [];
         const results = [];
         
@@ -125,11 +129,26 @@ async function sendHookNotification() {
         }
         
         // Create notification
+        let title, message;
+
+        if (notificationType === 'response') {
+            title = `Claude Response - ${projectName}`;
+            // Truncate response if too long (Discord limit is 4096 chars for embed description)
+            message = responseText.length > 1900
+                ? responseText.substring(0, 1900) + '\n\n...(truncated)'
+                : responseText;
+        } else {
+            title = `Claude ${notificationType === 'completed' ? 'Task Completed' : 'Waiting for Input'}`;
+            message = `Claude has ${notificationType === 'completed' ? 'completed a task' : 'is waiting for input'}`;
+        }
+
         const notification = {
             type: notificationType,
-            title: `Claude ${notificationType === 'completed' ? 'Task Completed' : 'Waiting for Input'}`,
-            message: `Claude has ${notificationType === 'completed' ? 'completed a task' : 'is waiting for input'}`,
-            project: projectName
+            title: title,
+            message: message,
+            project: projectName,
+            responseText: responseText,
+            thinkingText: thinkingText
         };
         
         console.log(`📱 Sending ${notificationType} notification for project: ${projectName}`);
@@ -156,7 +175,7 @@ async function sendHookNotification() {
         // Report overall results
         const successful = results.filter(r => r.success).length;
         const total = results.length;
-        
+
         if (successful > 0) {
             console.log(`\n✅ Successfully sent notifications via ${successful}/${total} channels`);
             if (results.some(r => r.name === 'Telegram' && r.success)) {
@@ -167,9 +186,23 @@ async function sendHookNotification() {
             }
         } else {
             console.log('\n❌ All notification channels failed');
-            process.exit(1);
         }
-        
+
+        // Disconnect all channels to allow clean exit
+        console.log('\n🔌 Disconnecting channels...');
+        for (const { name, channel } of channels) {
+            if (channel.disconnect) {
+                try {
+                    await channel.disconnect();
+                    console.log(`✅ ${name} disconnected`);
+                } catch (error) {
+                    console.error(`⚠️ ${name} disconnect error:`, error.message);
+                }
+            }
+        }
+
+        process.exit(successful > 0 ? 0 : 1);
+
     } catch (error) {
         console.error('❌ Hook notification error:', error.message);
         process.exit(1);
